@@ -20,9 +20,7 @@ namespace sgl
     void Chunk::setBlock(IVec3 position, uint8_t type)
     {
         if (position.x >= 0 && position.x < SIZE && position.y >= 0 && position.y < SIZE && position.z >= 0 && position.z < SIZE)
-        {
             blocks[position.x + SIZE * (position.y + SIZE * position.z)] = type;
-        }
     }
 
     uint8_t Chunk::getBlock(IVec3 position) const
@@ -134,10 +132,10 @@ namespace sgl
 
     void Chunk::compress() 
     {
-        if (blocks != nullptr) {
-            delete[] blocks;
-            blocks = nullptr;
-        }
+        // if (blocks != nullptr) {
+        //     delete[] blocks;
+        //     blocks = nullptr;
+        // }
         mesh.shrink_to_fit();
     }
 }

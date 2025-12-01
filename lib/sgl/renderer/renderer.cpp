@@ -34,6 +34,11 @@ namespace sgl
         sprite.pushSprite(0, 0);
     }
 
+    TFT_eSprite *Renderer::getSprite()
+    {
+        return &sprite;
+    }
+
     void Renderer::drawFace(const Vec3 &p1, const Vec3 &p2, const Vec3 &p3, const Vec3 &p4, uint8_t color)
     {
         sprite.createPalette(palette);

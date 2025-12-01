@@ -31,6 +31,7 @@ namespace sgl
 
         void draw();
 
+        TFT_eSprite* getSprite();
     private:
         TFT_eSPI *tft;
         TFT_eSprite sprite;

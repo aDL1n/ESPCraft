@@ -8,3 +8,4 @@
 
 #include "renderer/camera.h"
 #include "renderer/renderer.h"
+#include "renderer/hud.h"
