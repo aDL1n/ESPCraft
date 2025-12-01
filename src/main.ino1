@@ -1,0 +1,209 @@
+#include <TFT_eSPI.h>
+#include <algorithm>
+#include <sgl.h>
+
+TFT_eSPI tft = TFT_eSPI();
+TFT_eSprite spr = TFT_eSprite(&tft);
+
+// struct Point3D
+// {
+//     float x, y, z;
+// };
+
+struct Point2D
+{
+    int16_t x, y;
+};
+
+struct Face
+{
+    uint8_t v1, v2, v3, v4;
+    uint8_t color_index;
+    float avg_z;
+};
+
+const bool DEBUG = false;
+const bool BACKFACE_CULLING = true;
+const bool VIEWPORT_CULLING = true;
+
+const int SCREEN_W = 320;
+const int SCREEN_H = 240;
+
+const float CUBE_SIZE = 60.0f;
+
+const float CENTER_X = SCREEN_W / 2;
+const float CENTER_Y = SCREEN_H / 2;
+const float CAMERA_Z = 250.0f;
+
+const float ROTATION_SPEED = 0.05f;
+
+const sgl::Vec3 vertices[8] = {
+    {-CUBE_SIZE, -CUBE_SIZE, -CUBE_SIZE},
+    {CUBE_SIZE, -CUBE_SIZE, -CUBE_SIZE},
+    {CUBE_SIZE, CUBE_SIZE, -CUBE_SIZE},
+    {-CUBE_SIZE, CUBE_SIZE, -CUBE_SIZE},
+    {-CUBE_SIZE, -CUBE_SIZE, CUBE_SIZE},
+    {CUBE_SIZE, -CUBE_SIZE, CUBE_SIZE},
+    {CUBE_SIZE, CUBE_SIZE, CUBE_SIZE},
+    {-CUBE_SIZE, CUBE_SIZE, CUBE_SIZE}
+};
+
+Face faces[6] = {
+    {0, 1, 2, 3, 12, 0.0f},
+    {4, 7, 6, 5, 9, 0.0f},
+    {0, 3, 7, 4, 15, 0.0f},
+    {1, 5, 6, 2, 10, 0.0f},
+    {0, 4, 5, 1, 14, 0.0f},
+    {3, 2, 6, 7, 5, 0.0f},
+};
+
+const uint16_t palette[16] = {
+    TFT_BLACK, TFT_ORANGE, TFT_DARKGREEN, TFT_DARKCYAN,
+    TFT_MAROON, TFT_PURPLE, TFT_OLIVE, TFT_DARKGREY,
+    TFT_ORANGE, TFT_BLUE, TFT_GREEN, TFT_CYAN,
+    TFT_RED, TFT_NAVY, TFT_YELLOW, TFT_WHITE
+};
+
+const int8_t faces_size = sizeof(faces) / sizeof(faces[0]);
+const int8_t vertices_size = sizeof(vertices) / sizeof(vertices[0]);
+
+sgl::Vec3 transformed_vertices[8];
+
+float angleX = 0.0f;
+float angleY = 0.0f;
+float angleZ = 0.0f;
+
+inline Point2D project(const sgl::Vec3 &p)
+{
+    float perspective_factor = CAMERA_Z / (CAMERA_Z + p.z);
+    return {
+        static_cast<int16_t>(p.x * perspective_factor + CENTER_X),
+        static_cast<int16_t>(p.y * perspective_factor + CENTER_Y)
+    };
+}
+
+unsigned long lastTime = 0;
+int16_t frameCount = 0;
+float currentFPS = 0;
+
+void calculateFPS() {
+    frameCount++; 
+    unsigned long currentTime = millis();
+
+    if (currentTime - lastTime >= 1000) {
+        currentFPS = (float)frameCount * 1000.0f / (currentTime - lastTime);
+        lastTime = currentTime;
+        frameCount = 0;
+    }
+
+    spr.setTextColor(TFT_WHITE, TFT_BLACK);
+        spr.setCursor(5, 5);
+        spr.setTextSize(1);
+        spr.printf("FPS: %.1f", currentFPS);
+}
+
+void setup()
+{
+    tft.init();
+    tft.setRotation(1);
+    tft.initDMA();
+
+    spr.setTextColor(TFT_WHITE);
+    spr.setColorDepth(4);
+    spr.createSprite(SCREEN_W, SCREEN_H);
+
+    lastTime = millis();
+}
+
+void loop()
+{
+    float sx = sin(angleX), cx = cos(angleX);
+    float sy = sin(angleY), cy = cos(angleY);
+    // float sz = sin(angleZ), cz = cos(angleZ);
+
+    for (int i = 0; i < vertices_size; i++)
+    {
+        float x = vertices[i].x;
+        float y = vertices[i].y;
+        float z = vertices[i].z;
+
+        float y1 = y * cx - z * sx;
+        float z1 = y * sx + z * cx;
+
+        float x2 = x * cy - z1 * sy;
+        float z2 = x * sy + z1 * cy;
+
+        // float x3 = x2 * cz - y1 * sz;
+        // float y3 = x2 * sz + y1 * cz;
+
+        transformed_vertices[i].x = x2;
+        transformed_vertices[i].y = y1;
+        transformed_vertices[i].z = z2;
+    }
+
+    angleX += ROTATION_SPEED;
+    angleY += ROTATION_SPEED;
+    // angleZ += ROTATION_SPEED;
+
+    for (int8_t i = 0; i < faces_size; i++)
+    {
+        const Face &f = faces[i];
+        faces[i].avg_z = transformed_vertices[f.v1].z + transformed_vertices[f.v2].z +
+                         transformed_vertices[f.v3].z + transformed_vertices[f.v4].z;
+    }
+
+    std::sort(faces, faces + faces_size, [](const Face &a, const Face &b)
+              { return a.avg_z > b.avg_z; });
+
+    tft.fillScreen(0);
+    spr.fillScreen(TFT_BLACK);
+
+    for (int8_t i = 0; i < faces_size; i++)
+    {
+        const Face &current_face = faces[i];
+
+        Point2D p1 = project(transformed_vertices[current_face.v1]);
+        Point2D p2 = project(transformed_vertices[current_face.v2]);
+        Point2D p3 = project(transformed_vertices[current_face.v3]);
+        Point2D p4 = project(transformed_vertices[current_face.v4]);
+
+        if (BACKFACE_CULLING)
+        {
+            int16_t v1x = p2.x - p1.x;
+            int16_t v1y = p2.y - p1.y;
+            int16_t v2x = p3.x - p1.x;
+            int16_t v2y = p3.y - p1.y;
+            int32_t cross_product = v1x * v2y - v1y * v2x;
+
+            if (cross_product < 0)
+                continue;
+        }
+
+        if (VIEWPORT_CULLING)
+        {
+            bool all_left = (p1.x < 0 && p2.x < 0 && p3.x < 0 && p4.x < 0);
+            bool all_right = (p1.x > SCREEN_W && p2.x > SCREEN_W && p3.x > SCREEN_W && p4.x > SCREEN_W);
+            bool all_top = (p1.y < 0 && p2.y < 0 && p3.y < 0 && p4.y < 0);
+            bool all_bottom = (p1.y > SCREEN_H && p2.y > SCREEN_H && p3.y > SCREEN_H && p4.y > SCREEN_H);
+
+            if (all_left || all_right || all_top || all_bottom)
+                continue;
+        }
+
+        spr.createPalette(palette);
+
+        if (DEBUG)
+        {
+            spr.drawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, current_face.color_index);
+            spr.drawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, current_face.color_index);
+        }
+        else
+        {
+            spr.fillTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, current_face.color_index);
+            spr.fillTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, current_face.color_index);
+        }
+    }   
+    calculateFPS();
+
+    spr.pushSprite(0, 0);
+}
