@@ -13,9 +13,8 @@ namespace sgl
         {
         case BlockType::GRASS:
             if (faceIndex == 5)
-                return 2;
-            return 8;
-
+                return 5;
+            return 1;
         default:
             return blockType;
         }

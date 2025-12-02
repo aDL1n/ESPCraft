@@ -40,13 +40,5 @@ namespace sgl
         bool debug;
 
         std::vector<RenderItem> renderQueue;
-
-        const uint16_t palette[16] = {
-            TFT_BLACK, TFT_ORANGE, TFT_DARKGREEN, TFT_DARKCYAN,
-            TFT_MAROON, TFT_PURPLE, TFT_OLIVE, TFT_DARKGREY,
-            TFT_BROWN, TFT_BLUE, TFT_GREEN, TFT_CYAN,
-            TFT_RED, TFT_NAVY, TFT_YELLOW, TFT_WHITE};
-
-        void drawFace(const Vec3 &p1, const Vec3 &p2, const Vec3 &p3, const Vec3 &p4, uint8_t colorIndex);
     };
 }

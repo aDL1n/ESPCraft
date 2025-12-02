@@ -27,12 +27,8 @@ namespace sgl
     {   
         if (!blocks || position.x < 0 || position.x >= SIZE || position.y < 0 || position.y >= SIZE || position.z < 0 || position.z >= SIZE)
             return 0;
-        return blocks[position.x + SIZE * (position.y + SIZE * position.z)];
-    }
 
-    bool Chunk::isSolid(int x, int y, int z) const
-    {
-        return getBlock(IVec3(x, y, z)) != 0;
+        return blocks[position.x + SIZE * (position.y + SIZE * position.z)];
     }
 
     void Chunk::rebuildMesh()
@@ -40,24 +36,24 @@ namespace sgl
         mesh.clear();
         mesh.reserve(128);
 
-        const int uvAxes[3][2] = {{1, 2}, {0, 2}, {0, 1}};
+        const uint8_t uvAxes[3][2] = {{1, 2}, {0, 2}, {0, 1}};
         const uint8_t faceLookup[3][2] = {{3, 2}, {5, 4}, {1, 0}};
 
         uint8_t mask[SIZE * SIZE];
-        int x[3];
+        uint8_t x[3];
 
-        for (int d = 0; d < 3; d++)
+        for (uint8_t d = 0; d < 3; d++)
         {
-            int u = uvAxes[d][0];
-            int v = uvAxes[d][1];
+            uint8_t u = uvAxes[d][0];
+            uint8_t v = uvAxes[d][1];
 
             for (x[d] = 0; x[d] <= SIZE; ++x[d])
             {
-                int n = 0;
+                uint16_t n = 0;
                 for (x[v] = 0; x[v] < SIZE; ++x[v])
                     for (x[u] = 0; x[u] < SIZE; ++x[u])
                     {
-                        int prevCoord[3] = {x[0], x[1], x[2]};
+                        uint8_t prevCoord[3] = {x[0], x[1], x[2]};
                         prevCoord[d]--;
 
                         uint8_t bCurr = (x[d] < SIZE) ? getBlock(IVec3(x[0], x[1], x[2])) : 0;
@@ -72,12 +68,12 @@ namespace sgl
                     }
 
                 n = 0;
-                for (int j = 0; j < SIZE; ++j)
-                    for (int i = 0; i < SIZE;)
+                for (uint8_t j = 0; j < SIZE; ++j)
+                    for (uint8_t i = 0; i < SIZE;)
                         if (mask[n] != 0)
                         {
-                            int type = mask[n];
-                            int w, h;
+                            uint8_t type = mask[n];
+                            uint8_t w, h;
 
                             for (w = 1; i + w < SIZE && mask[n + w] == type; w++)
                             {
@@ -86,7 +82,7 @@ namespace sgl
                             bool done = false;
                             for (h = 1; j + h < SIZE; h++)
                             {
-                                for (int k = 0; k < w; k++)
+                                for (uint8_t k = 0; k < w; k++)
                                 {
                                     if (mask[n + k + h * SIZE] != type)
                                     {
@@ -101,7 +97,7 @@ namespace sgl
                             x[u] = i;
                             x[v] = j;
 
-                            int colorCoord[3] = {x[0], x[1], x[2]};
+                            uint8_t colorCoord[3] = {x[0], x[1], x[2]};
                             if (type == 1)
                                 colorCoord[d]--;
 
@@ -109,13 +105,13 @@ namespace sgl
                             uint8_t faceIdx = faceLookup[d][type - 1];
                             uint8_t finalColor = getBlockColor(blockID, faceIdx);
 
-                            mesh.push_back({(uint8_t)x[0], (uint8_t)x[1], (uint8_t)x[2],
+                            mesh.push_back({x[0], x[1], x[2],
                                             faceIdx,
                                             finalColor,
-                                            (uint8_t)w, (uint8_t)h});
+                                            w, h});
 
-                            for (int ly = 0; ly < h; ly++)
-                                for (int lx = 0; lx < w; lx++)
+                            for (uint8_t ly = 0; ly < h; ly++)
+                                for (uint8_t lx = 0; lx < w; lx++)
                                     mask[n + lx + ly * SIZE] = 0;
 
                             i += w;
@@ -128,14 +124,7 @@ namespace sgl
                         }
             }
         }
-    }
 
-    void Chunk::compress() 
-    {
-        // if (blocks != nullptr) {
-        //     delete[] blocks;
-        //     blocks = nullptr;
-        // }
         mesh.shrink_to_fit();
     }
 }

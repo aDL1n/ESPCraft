@@ -12,10 +12,7 @@ using namespace sgl;
 TFT_eSPI tft;
 Camera camera(320, 240, 120);
 Renderer *renderer;
-
 Hud *hud;
-
-// Vec3 av = Vec3();
 
 std::vector<sgl::Chunk *> chunks;
 
@@ -34,16 +31,15 @@ void setup()
 
     hud = new Hud(renderer->getSprite());
 
-    for (int16_t x = 0; x < 2; x++)
+    for (int16_t x = -1; x < 2; x++)
     {   
-        Chunk *chunk = new sgl::Chunk(IVec3((x * 2) - 1, -1, 0));
+        Chunk *chunk = new sgl::Chunk(IVec3(x, -1, 0));
         for (uint8_t x = 0; x < 16; x++)
             for (uint8_t z = 0; z < 16; z++)
                 for (uint8_t y = 0; y < 16; y++)
                     chunk->setBlock(IVec3(x, y, z), 1);
         
         chunk->rebuildMesh();
-        chunk->compress(); 
 
         chunks.push_back(chunk);
     }
@@ -51,22 +47,28 @@ void setup()
 
 uint8_t xi = 0;
 uint8_t zi = 0;
-uint8_t yi = 15;
+uint8_t yi = 16;
 
 bool place = false;
 
-void loop()
-{   
+void render()
+{
     renderer->drawChunk(chunks);
     hud->render();
 
     renderer->draw();
     renderer->clear();
-    
-    chunks[0]->setBlock(IVec3(xi, yi, zi), place);
-    chunks[1]->setBlock(IVec3(xi, yi, zi), place);
+}
+
+void update()
+{
+    chunks[0]->setBlock(IVec3(xi, yi - 1, zi), place);
+    chunks[1]->setBlock(IVec3(xi, yi - 1, zi), place);
+    chunks[2]->setBlock(IVec3(xi, yi - 1, zi), place);
+
     chunks[0]->rebuildMesh();
     chunks[1]->rebuildMesh();
+    chunks[2]->rebuildMesh();  
 
     xi++;
 
@@ -79,12 +81,18 @@ void loop()
     if (zi >= 16)
     {
         zi = 0;
-        yi--;
+        yi--; 
     }
 
     if (yi <= 0)
     {
-        yi = 15;
+        yi = 16;
         place = !place;
     }
+}
+
+void loop()
+{   
+    render();
+    update();
 }

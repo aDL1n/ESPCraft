@@ -20,18 +20,18 @@ namespace sgl
         sprite.setColorDepth(4);
         sprite.createSprite(320, 240);
 
-        sprite.createPalette(palette);
+        sprite.createPalette(default_4bit_palette);
     }
 
     void Renderer::clear()
     {
-        sprite.fillSprite(0);
+        sprite.fillSprite(10);
         renderQueue.clear();
     }
 
     void Renderer::draw()
     {
-        sprite.pushSprite(0, 0);
+        sprite.pushSprite(0, 0, 0);
     }
 
     TFT_eSprite *Renderer::getSprite()
@@ -39,35 +39,19 @@ namespace sgl
         return &sprite;
     }
 
-    void Renderer::drawFace(const Vec3 &p1, const Vec3 &p2, const Vec3 &p3, const Vec3 &p4, uint8_t color)
-    {
-        sprite.createPalette(palette);
-
-        if (debug)
-        {
-            sprite.drawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color);
-            sprite.drawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color);
-        }
-        else
-        {
-            sprite.fillTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color);
-            sprite.fillTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color);
-        }
-    }
-
     void Renderer::drawCube(const Vec3 &av, const IVec3 &position)
     {
         Mat3 rotation = Mat3::rotation(av);
 
         Vec3 transformed_vertices[Cube::vertices_size];
-        for (int i = 0; i < Cube::vertices_size; ++i)
+        for (uint16_t i = 0; i < Cube::vertices_size; ++i)
         {
             IVec3 local = Cube::vertices[i] * 16;
             transformed_vertices[i] = rotation.multiply(local) + position;
         }
 
         float face_z[Cube::faces_size];
-        for (int i = 0; i < Cube::faces_size; ++i)
+        for (uint16_t i = 0; i < Cube::faces_size; ++i)
         {
             const Face &f = Cube::faces[i];
             face_z[i] = transformed_vertices[f.v1].z +
@@ -76,13 +60,13 @@ namespace sgl
                         transformed_vertices[f.v4].z;
         }
 
-        int order[Cube::faces_size] = {0, 1, 2, 3, 4, 5};
+        uint8_t order[Cube::faces_size] = {0, 1, 2, 3, 4, 5};
         std::sort(order, order + Cube::faces_size, [&](int16_t a, int16_t b)
                   { return face_z[a] > face_z[b]; });
 
-        for (int ii = 0; ii < Cube::faces_size; ++ii)
+        for (uint8_t ii = 0; ii < Cube::faces_size; ++ii)
         {
-            const int i = order[ii];
+            const uint8_t i = order[ii];
             const Face &face = Cube::faces[i];
 
             Vec3 p1 = camera->project(transformed_vertices[face.v1]);
@@ -107,7 +91,16 @@ namespace sgl
             if (all_left || all_right || all_top || all_bottom)
                 continue;
 
-            drawFace(p1, p2, p3, p4, face.color);
+            if (debug)
+            {
+                sprite.drawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, face.color);
+                sprite.drawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, face.color);
+            }
+            else
+            {
+                sprite.fillTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, face.color);
+                sprite.fillTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, face.color);
+            }
         }
     }
 
@@ -174,7 +167,7 @@ namespace sgl
                 float avgZ = 0;
                 bool visible = true;
 
-                for (int i = 0; i < 4; i++)
+                for (uint8_t i = 0; i < 4; i++)
                 {
                     p[i] = camera->project({v[i].x * 16.0f + cx,
                                             v[i].y * 16.0f + cy,
@@ -209,7 +202,7 @@ namespace sgl
                   { return a.zDepth > b.zDepth; });
 
         for (const RenderItem &item : renderQueue)
-        {
+        {   
             if (debug)
             {
                 sprite.drawTriangle(item.x1, item.y1, item.x2, item.y2, item.x3, item.y3, item.color);

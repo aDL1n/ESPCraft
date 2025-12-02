@@ -26,14 +26,10 @@ namespace sgl
 
         void rebuildMesh();
 
-        void compress();
-
         const std::vector<ChunkFace>& getMesh() const { return mesh; }
     private:
         uint8_t* blocks;
         std::vector<ChunkFace> mesh;
-
-        bool isSolid(int x, int y, int z) const;
     };
     
 }
