@@ -46,7 +46,7 @@ namespace sgl
         Vec3 transformed_vertices[Cube::vertices_size];
         for (uint16_t i = 0; i < Cube::vertices_size; ++i)
         {
-            IVec3 local = Cube::vertices[i] * 16;
+            IVec3 local = Cube::vertices[i];
             transformed_vertices[i] = rotation.multiply(local) + position;
         }
 
@@ -168,9 +168,9 @@ namespace sgl
 
             for (uint8_t i = 0; i < 4; i++)
             {
-                projects[i] = camera->project({v[i].x * 16.0f + cx,
-                                               v[i].y * 16.0f + cy,
-                                               v[i].z * 16.0f + cz});
+                projects[i] = camera->project({v[i].x + cx,
+                                               v[i].y + cy,
+                                               v[i].z + cz});
 
                 if (projects[i].z < camera->near)
                 {

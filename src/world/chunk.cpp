@@ -8,7 +8,7 @@ namespace world
         blocks = new uint8_t[SIZE * SIZE * SIZE];
         memset(blocks, 0, SIZE * SIZE * SIZE);
 
-        mesh.position = pos * SIZE * 16;
+        mesh.position = pos * SIZE;
     }
 
     Chunk::~Chunk()

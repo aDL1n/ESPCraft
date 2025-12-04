@@ -24,7 +24,7 @@ void setup()
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(0, 300, -400);
+    camera.position = sgl::Vec3(8, 24, -16);
     camera.rotation.x = 40.0f * DEG_TO_RAD;
     camera.update();
 
