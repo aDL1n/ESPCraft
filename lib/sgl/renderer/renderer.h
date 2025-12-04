@@ -5,7 +5,7 @@
 
 #include "math/mat3.h"
 #include "objects/cube.h"
-#include "objects/chunk.h"
+#include "objects/mesh.h"
 #include "camera.h"
 
 namespace sgl
@@ -27,7 +27,7 @@ namespace sgl
         void clear();
 
         void drawCube(const Vec3 &av, const IVec3 &position);
-        void drawChunk(const std::vector<Chunk*>& chunks);
+        void drawMesh(const sgl::Mesh *mesh);
 
         void draw();
 

@@ -1,15 +1,14 @@
 #include "Chunk.h"
 
-#include "Cube.h"
-#include "util/blocks.h"
-
-namespace sgl
+namespace world
 {
 
-    Chunk::Chunk(IVec3 pos) : position(pos)
+    Chunk::Chunk(sgl::IVec3 pos) : position(pos)
     {
         blocks = new uint8_t[SIZE * SIZE * SIZE];
         memset(blocks, 0, SIZE * SIZE * SIZE);
+
+        mesh.position = pos * SIZE * 16;
     }
 
     Chunk::~Chunk()
@@ -17,14 +16,14 @@ namespace sgl
         delete[] blocks;
     }
 
-    void Chunk::setBlock(IVec3 position, uint8_t type)
+    void Chunk::setBlock(sgl::IVec3 position, uint8_t type)
     {
         if (position.x >= 0 && position.x < SIZE && position.y >= 0 && position.y < SIZE && position.z >= 0 && position.z < SIZE)
             blocks[position.x + SIZE * (position.y + SIZE * position.z)] = type;
     }
 
-    uint8_t Chunk::getBlock(IVec3 position) const
-    {   
+    uint8_t Chunk::getBlock(sgl::IVec3 position) const
+    {
         if (!blocks || position.x < 0 || position.x >= SIZE || position.y < 0 || position.y >= SIZE || position.z < 0 || position.z >= SIZE)
             return 0;
 
@@ -56,8 +55,8 @@ namespace sgl
                         uint8_t prevCoord[3] = {x[0], x[1], x[2]};
                         prevCoord[d]--;
 
-                        uint8_t bCurr = (x[d] < SIZE) ? getBlock(IVec3(x[0], x[1], x[2])) : 0;
-                        uint8_t bPrev = (x[d] > 0) ? getBlock(IVec3(prevCoord[0], prevCoord[1], prevCoord[2])) : 0;
+                        uint8_t bCurr = (x[d] < SIZE) ? getBlock(sgl::IVec3(x[0], x[1], x[2])) : 0;
+                        uint8_t bPrev = (x[d] > 0) ? getBlock(sgl::IVec3(prevCoord[0], prevCoord[1], prevCoord[2])) : 0;
 
                         if (bPrev != 0 && bCurr == 0)
                             mask[n++] = 1;
@@ -101,14 +100,17 @@ namespace sgl
                             if (type == 1)
                                 colorCoord[d]--;
 
-                            uint8_t blockID = getBlock(IVec3(colorCoord[0], colorCoord[1], colorCoord[2]));
+                            uint8_t blockID = getBlock(sgl::IVec3(colorCoord[0], colorCoord[1], colorCoord[2]));
                             uint8_t faceIdx = faceLookup[d][type - 1];
                             uint8_t finalColor = getBlockColor(blockID, faceIdx);
 
-                            mesh.push_back({x[0], x[1], x[2],
-                                            faceIdx,
-                                            finalColor,
-                                            w, h});
+                            mesh.faces.push_back({x[0],
+                                                  x[1],
+                                                  x[2],
+                                                  faceIdx,
+                                                  finalColor,
+                                                  w,
+                                                  h});
 
                             for (uint8_t ly = 0; ly < h; ly++)
                                 for (uint8_t lx = 0; lx < w; lx++)
@@ -125,6 +127,6 @@ namespace sgl
             }
         }
 
-        mesh.shrink_to_fit();
+        mesh.faces.shrink_to_fit();
     }
 }

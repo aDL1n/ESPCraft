@@ -104,105 +104,104 @@ namespace sgl
         }
     }
 
-    void Renderer::drawChunk(const std::vector<Chunk *> &chunks)
+    void Renderer::drawMesh(const sgl::Mesh *mesh)
     {
-        for (const Chunk *chunk : chunks)
+
+        const float cx = mesh->position.x;
+        const float cy = mesh->position.y;
+        const float cz = mesh->position.z;
+
+        const std::vector<MeshFace> &faces = mesh->faces;
+
+        for (const MeshFace &face : faces)
         {
-            const float cx = chunk->position.x * Chunk::SIZE * 16.0f;
-            const float cy = chunk->position.y * Chunk::SIZE * 16.0f;
-            const float cz = chunk->position.z * Chunk::SIZE * 16.0f;
+            uint8_t x = face.x;
+            uint8_t y = face.y;
+            uint8_t z = face.z;
+            uint8_t w = face.w;
+            uint8_t h = face.h;
 
-            const std::vector<ChunkFace> &mesh = chunk->getMesh();
-
-            for (const ChunkFace &f : mesh)
-            {   
-                float x = (float)f.x;
-                float y = (float)f.y;
-                float z = (float)f.z;
-                float w = (float)f.w;
-                float h = (float)f.h;
-
-                Vec3 v[4];
-                switch (f.faceIndex)
-                {
-                case 1:
-                    v[0] = {x + w, y + h, z};
-                    v[1] = {x + w, y, z};
-                    v[2] = {x, y, z};
-                    v[3] = {x, y + h, z};
-                    break;
-                case 0:
-                    v[0] = {x, y + h, z};
-                    v[1] = {x, y, z};
-                    v[2] = {x + w, y, z};
-                    v[3] = {x + w, y + h, z};
-                    break;
-                case 2:
-                    v[0] = {x, y + w, z + h};
-                    v[1] = {x, y, z + h};
-                    v[2] = {x, y, z};
-                    v[3] = {x, y + w, z};
-                    break;
-                case 3:
-                    v[0] = {x, y + w, z};
-                    v[1] = {x, y, z};
-                    v[2] = {x, y, z + h};
-                    v[3] = {x, y + w, z + h};
-                    break;
-                case 4:
-                    v[0] = {x + w, y, z + h};
-                    v[1] = {x + w, y, z};
-                    v[2] = {x, y, z};
-                    v[3] = {x, y, z + h};
-                    break;
-                case 5:
-                    v[0] = {x, y, z + h};
-                    v[1] = {x, y, z};
-                    v[2] = {x + w, y, z};
-                    v[3] = {x + w, y, z + h};
-                    break;
-                }
-
-                Vec3 p[4];
-                float avgZ = 0;
-                bool visible = true;
-
-                for (uint8_t i = 0; i < 4; i++)
-                {
-                    p[i] = camera->project({v[i].x * 16.0f + cx,
-                                            v[i].y * 16.0f + cy,
-                                            v[i].z * 16.0f + cz});
-
-                    if (p[i].z < camera->near)
-                    {
-                        visible = false;
-                        break;
-                    }
-                    avgZ += p[i].z;
-                }
-
-                if (!visible)
-                    continue;
-
-                int32_t cross = (int32_t)(p[1].x - p[0].x) * (p[2].y - p[0].y) -
-                                (int32_t)(p[1].y - p[0].y) * (p[2].x - p[0].x);
-
-                if (cross >= 0)
-                    continue;
-
-                renderQueue.push_back({(int16_t)p[0].x, (int16_t)p[0].y,
-                                       (int16_t)p[1].x, (int16_t)p[1].y,
-                                       (int16_t)p[2].x, (int16_t)p[2].y,
-                                       (int16_t)p[3].x, (int16_t)p[3].y,
-                                       (uint16_t)(avgZ * 0.25f),
-                                       f.color});
+            IVec3 v[4];
+            switch (face.index)
+            {
+            case 1:
+                v[0] = {x + w, y + h, z};
+                v[1] = {x + w, y, z};
+                v[2] = {x, y, z};
+                v[3] = {x, y + h, z};
+                break;
+            case 0:
+                v[0] = {x, y + h, z};
+                v[1] = {x, y, z};
+                v[2] = {x + w, y, z};
+                v[3] = {x + w, y + h, z};
+                break;
+            case 2:
+                v[0] = {x, y + w, z + h};
+                v[1] = {x, y, z + h};
+                v[2] = {x, y, z};
+                v[3] = {x, y + w, z};
+                break;
+            case 3:
+                v[0] = {x, y + w, z};
+                v[1] = {x, y, z};
+                v[2] = {x, y, z + h};
+                v[3] = {x, y + w, z + h};
+                break;
+            case 4:
+                v[0] = {x + w, y, z + h};
+                v[1] = {x + w, y, z};
+                v[2] = {x, y, z};
+                v[3] = {x, y, z + h};
+                break;
+            case 5:
+                v[0] = {x, y, z + h};
+                v[1] = {x, y, z};
+                v[2] = {x + w, y, z};
+                v[3] = {x + w, y, z + h};
+                break;
             }
+
+            Vec3 projects[4];
+            float avgZ = 0;
+            bool visible = true;
+
+            for (uint8_t i = 0; i < 4; i++)
+            {
+                projects[i] = camera->project({v[i].x * 16.0f + cx,
+                                               v[i].y * 16.0f + cy,
+                                               v[i].z * 16.0f + cz});
+
+                if (projects[i].z < camera->near)
+                {
+                    visible = false;
+                    break;
+                }
+                avgZ += projects[i].z;
+            }
+
+            if (!visible)
+                continue;
+
+            int32_t cross = (int32_t)(projects[1].x - projects[0].x) * (projects[2].y - projects[0].y) -
+                            (int32_t)(projects[1].y - projects[0].y) * (projects[2].x - projects[0].x);
+
+            if (cross >= 0)
+                continue;
+
+            renderQueue.push_back({(int16_t)projects[0].x, (int16_t)projects[0].y,
+                                   (int16_t)projects[1].x, (int16_t)projects[1].y,
+                                   (int16_t)projects[2].x, (int16_t)projects[2].y,
+                                   (int16_t)projects[3].x, (int16_t)projects[3].y,
+                                   (uint16_t)(avgZ * 0.25f),
+                                   face.color});
         }
+
         std::sort(renderQueue.begin(), renderQueue.end(), [](const RenderItem &a, const RenderItem &b)
                   { return a.zDepth > b.zDepth; });
 
         for (const RenderItem &item : renderQueue)
-        {   
+        {
             if (debug)
             {
                 sprite.drawTriangle(item.x1, item.y1, item.x2, item.y2, item.x3, item.y3, item.color);

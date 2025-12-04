@@ -1,6 +1,8 @@
 #include <TFT_eSPI.h>
 #include <sgl.h>
 
+#include "world/chunk.h"
+
 using namespace sgl;
 
 // TODO
@@ -14,7 +16,7 @@ Camera camera(320, 240, 120);
 Renderer *renderer;
 Hud *hud;
 
-std::vector<sgl::Chunk *> chunks;
+std::vector<world::Chunk*> chunks;
 
 
 void setup()
@@ -22,7 +24,7 @@ void setup()
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(120, 230, -200);
+    camera.position = sgl::Vec3(0, 300, -400);
     camera.rotation.x = 40.0f * DEG_TO_RAD;
     camera.update();
 
@@ -33,7 +35,7 @@ void setup()
 
     for (int16_t x = -1; x < 2; x++)
     {   
-        Chunk *chunk = new sgl::Chunk(IVec3(x, -1, 0));
+        world::Chunk *chunk = new world::Chunk(IVec3(x, 0, 0));
         for (uint8_t x = 0; x < 16; x++)
             for (uint8_t z = 0; z < 16; z++)
                 for (uint8_t y = 0; y < 16; y++)
@@ -52,8 +54,9 @@ uint8_t yi = 16;
 bool place = false;
 
 void render()
-{
-    renderer->drawChunk(chunks);
+{   
+    for (world::Chunk *chunk : chunks)
+        renderer->drawMesh(&chunk->getMesh());
     hud->render();
 
     renderer->draw();
