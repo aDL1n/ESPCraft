@@ -31,6 +31,10 @@ namespace world
 
         if (position.x < -offset || position.x >= offset)
             return;
+
+        if (position.z < -offset || position.z >= offset)
+            return;
+
         if (position.y >= HEIGHT)
             return;
 
@@ -52,13 +56,16 @@ namespace world
         if (chunk_position.x < -offset || chunk_position.x >= offset)
             return nullptr;
 
-        if (chunk_position.z < 0 || chunk_position.z >= HEIGHT)
+        if (chunk_position.z < -offset || chunk_position.z >= offset)
+            return nullptr;
+
+        if (chunk_position.y >= HEIGHT)
             return nullptr;
 
         return chunks[chunk_position.x + offset + (chunk_position.z * SIZE)];
     }
 
-    std::array<Chunk *, World::SIZE * World::HEIGHT> World::getChunks()
+    std::array<Chunk *, World::SIZE * World::HEIGHT> &World::getChunks()
     {
         return this->chunks;
     }

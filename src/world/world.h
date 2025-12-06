@@ -20,7 +20,7 @@ namespace world
         void setChunk(Chunk *chunk, sgl::IVec3 position);
 
         Chunk* getChunk(sgl::IVec3 chunk_position) const; 
-        std::array<Chunk*, SIZE * HEIGHT> getChunks();
+        std::array<Chunk*, SIZE * HEIGHT> &getChunks();
 
         uint8_t getBlock(sgl::IVec3 position) const;
         void setBlock(uint8_t block, sgl::IVec3 position);
