@@ -34,4 +34,8 @@ namespace sgl
     {
         return IVec3(x * k, y * k, z * k);
     }
+    bool IVec3::operator==(const IVec3 &y)
+    {
+        return this->x == y.x && this->y == y.y && this->z == y.z;
+    }
 }

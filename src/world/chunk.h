@@ -1,8 +1,9 @@
+#pragma once
+
 #include <cstdint>
 #include <ArxContainer.h>
 
 #include <sgl.h>
-
 #include "blocks.h"
 
 namespace world

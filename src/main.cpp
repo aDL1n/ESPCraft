@@ -2,6 +2,7 @@
 #include <sgl.h>
 
 #include "world/chunk.h"
+#include "world/world.h"
 
 using namespace sgl;
 
@@ -16,8 +17,7 @@ Camera camera(320, 240, 120);
 Renderer *renderer;
 Hud *hud;
 
-std::vector<world::Chunk*> chunks;
-
+world::World *w;
 
 void setup()
 {
@@ -33,21 +33,12 @@ void setup()
 
     hud = new Hud(renderer->getSprite());
 
-    for (int16_t x = -1; x < 2; x++)
-    {   
-        world::Chunk *chunk = new world::Chunk(IVec3(x, 0, 0));
-        for (uint8_t x = 0; x < 16; x++)
-            for (uint8_t z = 0; z < 16; z++)
-                for (uint8_t y = 0; y < 16; y++)
-                    chunk->setBlock(IVec3(x, y, z), 1);
-        
-        chunk->rebuildMesh();
+    w = new world::World();
 
-        chunks.push_back(chunk);
-    }
+    w->generate();
 }
 
-uint8_t xi = 0;
+int16_t xi = -16;
 uint8_t zi = 0;
 uint8_t yi = 16;
 
@@ -55,7 +46,7 @@ bool place = false;
 
 void render()
 {   
-    for (world::Chunk *chunk : chunks)
+    for (world::Chunk *chunk : w->getChunks())
         renderer->drawMesh(&chunk->getMesh());
     hud->render();
 
@@ -64,24 +55,27 @@ void render()
 }
 
 void update()
-{
-    chunks[0]->setBlock(IVec3(xi, yi - 1, zi), place);
-    chunks[1]->setBlock(IVec3(xi, yi - 1, zi), place);
-    chunks[2]->setBlock(IVec3(xi, yi - 1, zi), place);
+{   
 
-    chunks[0]->rebuildMesh();
-    chunks[1]->rebuildMesh();
-    chunks[2]->rebuildMesh();  
+    // chunks[0]->setBlock(IVec3(xi, yi - 1, zi), place);
+    // chunks[1]->setBlock(IVec3(xi, yi - 1, zi), place);
+    // chunks[2]->setBlock(IVec3(xi, yi - 1, zi), place);
+
+    // chunks[0]->rebuildMesh();
+    // chunks[1]->rebuildMesh();
+    // chunks[2]->rebuildMesh();
+
+    w->setBlock(place, IVec3(xi, yi - 1, zi));
 
     xi++;
 
-    if (xi >= 16)
+    if (xi >= 16 * 2)
     {
-        xi = 0;
+        xi = -16;
         zi++;
     } 
 
-    if (zi >= 16)
+    if (zi >= 16 * 2)
     {
         zi = 0;
         yi--; 
