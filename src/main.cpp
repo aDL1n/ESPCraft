@@ -21,10 +21,11 @@ world::World *w;
 
 void setup()
 {
+
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(8, 24, -16);
+    camera.position = sgl::Vec3(0, 24, -16);
     camera.rotation.x = 40.0f * DEG_TO_RAD;
     camera.update();
 
@@ -47,7 +48,8 @@ bool place = false;
 void render()
 {   
     for (world::Chunk *chunk : w->getChunks())
-        renderer->drawMesh(&chunk->getMesh());
+        if (chunk != nullptr) 
+            renderer->drawMesh(&chunk->getMesh());
     hud->render();
 
     renderer->draw();
@@ -56,29 +58,20 @@ void render()
 
 void update()
 {   
-
-    // chunks[0]->setBlock(IVec3(xi, yi - 1, zi), place);
-    // chunks[1]->setBlock(IVec3(xi, yi - 1, zi), place);
-    // chunks[2]->setBlock(IVec3(xi, yi - 1, zi), place);
-
-    // chunks[0]->rebuildMesh();
-    // chunks[1]->rebuildMesh();
-    // chunks[2]->rebuildMesh();
-
     w->setBlock(place, IVec3(xi, yi - 1, zi));
 
     xi++;
 
-    if (xi >= 16 * 2)
+    if (xi >= 16)
     {
         xi = -16;
         zi++;
     } 
 
-    if (zi >= 16 * 2)
+    if (zi >= 16)
     {
         zi = 0;
-        yi--; 
+        yi--;
     }
 
     if (yi <= 0)

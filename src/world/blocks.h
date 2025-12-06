@@ -18,6 +18,8 @@ namespace world
             if (faceIndex == 5)
                 return 5;
             return 1;
+        case BlockType::STONE:
+            return 8;
         default:
             return blockType;
         }
