@@ -19,6 +19,6 @@ namespace sgl
         IVec3 operator-(const IVec3 &o) const;
         IVec3 operator*(int32_t k) const;
         bool operator==(const IVec3 &y);
-
+        bool operator!=(const IVec3 &y);
     };
 }

@@ -1,5 +1,6 @@
 #include <TFT_eSPI.h>
 #include <sgl.h>
+#include <ArxContainer.h>
 
 #include "world/chunk.h"
 #include "world/world.h"
@@ -25,7 +26,7 @@ void setup()
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(0, 24, -16);
+    camera.position = sgl::Vec3(0, 24, -32);
     camera.rotation.x = 40.0f * DEG_TO_RAD;
     camera.update();
 
@@ -35,20 +36,19 @@ void setup()
     hud = new Hud(renderer->getSprite());
 
     w = new world::World();
-
     w->generate();
 }
 
 int16_t xi = -16;
-uint8_t zi = 0;
+int16_t zi = -16;
 uint8_t yi = 16;
 
 bool place = false;
 
 void render()
-{   
+{
     for (world::Chunk *chunk : w->getChunks())
-        if (chunk != nullptr) 
+        if (chunk != nullptr)
             renderer->drawMesh(&chunk->getMesh());
     hud->render();
 
@@ -57,7 +57,7 @@ void render()
 }
 
 void update()
-{   
+{
     w->setBlock(place, IVec3(xi, yi - 1, zi));
 
     xi++;
@@ -66,11 +66,11 @@ void update()
     {
         xi = -16;
         zi++;
-    } 
+    }
 
     if (zi >= 16)
     {
-        zi = 0;
+        zi = -16;
         yi--;
     }
 
@@ -82,7 +82,7 @@ void update()
 }
 
 void loop()
-{   
+{
     render();
     update();
 }

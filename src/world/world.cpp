@@ -8,21 +8,23 @@ namespace world
     }
 
     void World::generate()
-    {
-        for (int16_t y = 0; y < HEIGHT; y++)
-            for (int16_t x = -(SIZE / 2); x < SIZE / 2; x++)
-            // for (int16_t z = -1; z < 2; z++)
-            {
-                Chunk *chunk = new Chunk(sgl::IVec3(x, 0, y));
-                for (uint8_t x = 0; x < Chunk::SIZE; x++)
-                    for (uint8_t z = 0; z < Chunk::SIZE; z++)
-                        for (uint8_t y = 0; y < Chunk::SIZE; y++)
-                            chunk->setBlock(sgl::IVec3(x, y, z), BlockType::GRASS);
+    {   
+        int16_t offset = SIZE / 2;
+    
+        for (int16_t cx = -offset; cx < offset; cx++)
+            for (int16_t cz = -offset; cz < offset; cz++)
+                for (int16_t cy = 0; cy < HEIGHT; cy++)
+                {
+                    Chunk *chunk = new Chunk(sgl::IVec3(cx, cy, cz));
+                    for (uint8_t x = 0; x < Chunk::SIZE; x++)
+                        for (uint8_t z = 0; z < Chunk::SIZE; z++)
+                            for (uint8_t y = 0; y < Chunk::SIZE; y++)
+                                chunk->setBlock(sgl::IVec3(x, y, z), BlockType::GRASS);
 
-                chunk->rebuildMesh();
+                    chunk->rebuildMesh();
 
-                chunks[(x + (World::SIZE / 2)) + (y * World::SIZE)] = chunk;
-            }
+                    chunks[(cx + offset) + SIZE * (cy + HEIGHT * (cz + offset))] = chunk;
+                }
     }
 
     void World::setChunk(Chunk *chunk, sgl::IVec3 position)
@@ -35,10 +37,10 @@ namespace world
         if (position.z < -offset || position.z >= offset)
             return;
 
-        if (position.y >= HEIGHT)
+        if (position.y > 0 && position.y <= HEIGHT)
             return;
 
-        int index = position.x + offset + (position.z * SIZE);
+        int index = (position.x + offset) + SIZE * (position.y + HEIGHT * (position.z + offset));
 
         if (chunks[index] != nullptr)
             delete chunks[index];
@@ -59,13 +61,13 @@ namespace world
         if (chunk_position.z < -offset || chunk_position.z >= offset)
             return nullptr;
 
-        if (chunk_position.y >= HEIGHT)
+        if (chunk_position.y > 0 && chunk_position.y <= HEIGHT)
             return nullptr;
 
-        return chunks[chunk_position.x + offset + (chunk_position.z * SIZE)];
+        return chunks[(chunk_position.x + offset) + SIZE * (chunk_position.y + HEIGHT * (chunk_position.z + offset))];
     }
 
-    std::array<Chunk *, World::SIZE * World::HEIGHT> &World::getChunks()
+    std::array<Chunk *, World::SIZE * World::SIZE * World::HEIGHT> &World::getChunks()
     {
         return this->chunks;
     }

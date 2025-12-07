@@ -34,4 +34,14 @@ namespace sgl
     {
         return Vec3(x * k, y * k, z * k);
     }
+
+    bool Vec3::operator==(const Vec3 &y)
+    {
+        return this->x == y.x && this->y == y.y && this->z == y.z;
+    }
+
+    bool Vec3::operator==(const IVec3 &y)
+    {
+        return this->x == y.x && this->y == y.y && this->z == y.z;
+    }
 }

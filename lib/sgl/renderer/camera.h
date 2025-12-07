@@ -26,5 +26,7 @@ namespace sgl {
         void update();
 
         Vec3 project(const Vec3& p) const;
+
+        Vec3 getForward() const;
     };
 }

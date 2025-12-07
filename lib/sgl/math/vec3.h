@@ -17,5 +17,7 @@ namespace sgl
         Vec3 operator+(float f) const;
         Vec3 operator-(const Vec3 &o) const;
         Vec3 operator*(float k) const;
+        bool operator==(const Vec3 &y);
+        bool operator==(const IVec3 &y);
     };
 }

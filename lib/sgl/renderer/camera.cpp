@@ -11,6 +11,7 @@ namespace sgl
     {
         position = Vec3(0, 0, -50);
         rotation = Vec3(0, 0, 0);
+
         update();
     }
 
@@ -59,5 +60,14 @@ namespace sgl
             vx * scale + (screenW * 0.5f),
             -vy * scale + (screenH * 0.5f),
             vz);
+    }
+
+    Vec3 Camera::getForward() const
+    {
+        return Vec3(
+            viewMatrix.m[2][0],
+            viewMatrix.m[2][1],
+            viewMatrix.m[2][2]
+        );
     }
 }
