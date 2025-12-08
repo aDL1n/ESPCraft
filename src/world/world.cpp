@@ -8,13 +8,13 @@ namespace world
     }
 
     void World::generate()
-    {   
+    {
         int16_t offset = SIZE / 2;
-    
+
         for (int16_t cx = -offset; cx < offset; cx++)
             for (int16_t cz = -offset; cz < offset; cz++)
                 for (int16_t cy = 0; cy < HEIGHT; cy++)
-                {
+                {   
                     Chunk *chunk = new Chunk(sgl::IVec3(cx, cy, cz));
                     for (uint8_t x = 0; x < Chunk::SIZE; x++)
                         for (uint8_t z = 0; z < Chunk::SIZE; z++)
@@ -37,7 +37,7 @@ namespace world
         if (position.z < -offset || position.z >= offset)
             return;
 
-        if (position.y > 0 && position.y <= HEIGHT)
+        if (position.y < 0 || position.y >= HEIGHT)
             return;
 
         int index = (position.x + offset) + SIZE * (position.y + HEIGHT * (position.z + offset));
@@ -61,7 +61,7 @@ namespace world
         if (chunk_position.z < -offset || chunk_position.z >= offset)
             return nullptr;
 
-        if (chunk_position.y > 0 && chunk_position.y <= HEIGHT)
+        if (chunk_position.y < 0 || chunk_position.y >= HEIGHT)
             return nullptr;
 
         return chunks[(chunk_position.x + offset) + SIZE * (chunk_position.y + HEIGHT * (chunk_position.z + offset))];

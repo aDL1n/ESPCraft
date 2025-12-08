@@ -11,7 +11,7 @@ namespace world
     class Chunk
     {
     public:
-        static const int SIZE = 16;
+        static const uint8_t SIZE = 16;
         sgl::IVec3 position;
 
         Chunk(sgl::IVec3 pos);

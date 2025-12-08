@@ -20,8 +20,24 @@ Hud *hud;
 
 world::World *w;
 
+void getRam()
+{
+    long free_heap_size = ESP.getFreeHeap();
+    long largest_free_block = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+
+    Serial.print("Total free heap RAM: ");
+    Serial.print(free_heap_size);
+    Serial.println(" bytes");
+
+    Serial.print("Largest free block: ");
+    Serial.print(largest_free_block);
+    Serial.println(" bytes");
+}
+
 void setup()
 {
+    Serial.begin(115200);
+    while (!Serial) {}
 
     tft.init();
     tft.setRotation(1);
@@ -35,8 +51,12 @@ void setup()
 
     hud = new Hud(renderer->getSprite());
 
+    getRam();
+    
     w = new world::World();
     w->generate();
+
+    getRam();
 }
 
 int16_t xi = -16;
@@ -85,4 +105,6 @@ void loop()
 {
     render();
     update();
+
+    getRam();
 }

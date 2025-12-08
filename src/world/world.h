@@ -11,7 +11,7 @@ namespace world
     {
     public:
         static const uint8_t HEIGHT = 1;
-        static const uint8_t SIZE = 2;
+        static const uint8_t SIZE = 7; // 7 max = 245kb in ram
 
         World();
 

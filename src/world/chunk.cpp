@@ -18,13 +18,17 @@ namespace world
 
     void Chunk::setBlock(sgl::IVec3 position, uint8_t type)
     {
-        if (position.x >= 0 && position.x < SIZE && position.y >= 0 && position.y < SIZE && position.z >= 0 && position.z < SIZE)
+        if (position.x >= 0 && position.x < SIZE &&
+            position.y >= 0 && position.y < SIZE &&
+            position.z >= 0 && position.z < SIZE)
             blocks[position.x + SIZE * (position.y + SIZE * position.z)] = type;
     }
 
     uint8_t Chunk::getBlock(sgl::IVec3 position) const
     {
-        if (!blocks || position.x < 0 || position.x >= SIZE || position.y < 0 || position.y >= SIZE || position.z < 0 || position.z >= SIZE)
+        if (position.x < 0 || position.x >= SIZE ||
+            position.y < 0 || position.y >= SIZE ||
+            position.z < 0 || position.z >= SIZE)
             return 0;
 
         return blocks[position.x + SIZE * (position.y + SIZE * position.z)];
@@ -33,7 +37,6 @@ namespace world
     void Chunk::rebuildMesh()
     {
         mesh.clear();
-        mesh.reserve(128);
 
         const uint8_t uvAxes[3][2] = {{1, 2}, {0, 2}, {0, 1}};
         const uint8_t faceLookup[3][2] = {{3, 2}, {5, 4}, {1, 0}};
