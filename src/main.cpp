@@ -37,7 +37,9 @@ void getRam()
 void setup()
 {
     Serial.begin(115200);
-    while (!Serial) {}
+    while (!Serial)
+    {
+    }
 
     tft.init();
     tft.setRotation(1);
@@ -52,7 +54,7 @@ void setup()
     hud = new Hud(renderer->getSprite());
 
     getRam();
-    
+
     w = new world::World();
     w->generate();
 
@@ -86,6 +88,13 @@ void update()
     {
         xi = -16;
         zi++;
+
+        world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 120);
+
+        if (camara_block.hit)
+        {
+            Serial.println("Camera watching to block type:" + String(camara_block.type) + " at position x:" + String(camara_block.position.x) + " y:" + String(camara_block.position.y) + " z:" + String(camara_block.position.z));
+        }
     }
 
     if (zi >= 16)
@@ -105,6 +114,4 @@ void loop()
 {
     render();
     update();
-
-    getRam();
 }

@@ -14,7 +14,7 @@ namespace world
         for (int16_t cx = -offset; cx < offset; cx++)
             for (int16_t cz = -offset; cz < offset; cz++)
                 for (int16_t cy = 0; cy < HEIGHT; cy++)
-                {   
+                {
                     Chunk *chunk = new Chunk(sgl::IVec3(cx, cy, cz));
                     for (uint8_t x = 0; x < Chunk::SIZE; x++)
                         for (uint8_t z = 0; z < Chunk::SIZE; z++)
@@ -105,5 +105,56 @@ namespace world
                         block);
 
         chunk->rebuildMesh();
+    }
+
+    BlockHit World::getBlockAtView(sgl::Vec3 position, sgl::Vec3 direction, uint8_t max_distance)
+    {   
+        int32_t x = floorf(position.x);
+        int32_t y = floorf(position.y);
+        int32_t z = floorf(position.z);
+
+        int8_t step_x = (direction.x >= 0) ? 1 : -1;
+        int8_t step_y = (direction.y >= 0) ? 1 : -1;
+        int8_t step_z = (direction.z >= 0) ? 1 : -1;
+
+        float delta_x = (direction.x == 0.0f) ? std::numeric_limits<float>::max() : std::abs(1.0f / direction.x);
+        float delta_y = (direction.y == 0.0f) ? std::numeric_limits<float>::max() : std::abs(1.0f / direction.y);
+        float delta_z = (direction.z == 0.0f) ? std::numeric_limits<float>::max() : std::abs(1.0f / direction.z);
+
+        float start_x = (direction.x >= 0) ? (x + 1 - position.x) * delta_x : (x - position.x) * delta_x;
+        float start_y = (direction.y >= 0) ? (y + 1 - position.y) * delta_y : (y - position.y) * delta_y;
+        float start_z = (direction.z >= 0) ? (z + 1 - position.z) * delta_z : (z - position.z) * delta_z;
+
+        while (start_x < max_distance || start_y < max_distance || start_z < max_distance)
+        {   
+            uint8_t block_type = this->getBlock(sgl::IVec3(x, y, z));
+            if (block_type != BlockType::AIR)
+            {
+                BlockHit hit;
+                hit.hit = true;
+                hit.type = block_type;
+                hit.position = sgl::IVec3(x, y, z);
+
+                return hit;
+            }
+
+            if (start_x < start_y && start_x < start_z)
+            {
+                x += step_x;
+                start_x += delta_x;
+            } 
+            else if (start_y < start_z)
+            {
+                y += step_y;
+                start_y += delta_y;
+            }   
+            else
+            {
+                z += step_z;
+                start_z += delta_z;
+            }
+        }
+
+        return BlockHit({false});
     }
 }

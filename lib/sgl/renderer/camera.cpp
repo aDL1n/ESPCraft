@@ -65,8 +65,8 @@ namespace sgl
     Vec3 Camera::getForward() const
     {
         return Vec3(
-            viewMatrix.m[2][0],
-            viewMatrix.m[2][1],
+            viewMatrix.m[0][2],
+            viewMatrix.m[1][2],
             viewMatrix.m[2][2]
         );
     }
