@@ -1,6 +1,6 @@
 #include "pipeline.h"
 
-namespace render
+namespace renderer
 {
 
 }

@@ -7,7 +7,7 @@ namespace sgl
 {
 
     Camera::Camera(int16_t width, int16_t height, float fov)
-        : screenW(width), screenH(height), fov(fov), near(1.0f), far(1000.0f)
+        : screenW(width), screenH(height), fov(fov), near(0.1f), far(1000.0f)
     {
         position = Vec3(0, 0, -50);
         rotation = Vec3(0, 0, 0);
@@ -48,11 +48,6 @@ namespace sgl
         float vx = viewMatrix.m[0][0] * dx + viewMatrix.m[1][0] * dy + viewMatrix.m[2][0] * dz;
         float vy = viewMatrix.m[0][1] * dx + viewMatrix.m[1][1] * dy + viewMatrix.m[2][1] * dz;
         float vz = viewMatrix.m[0][2] * dx + viewMatrix.m[1][2] * dy + viewMatrix.m[2][2] * dz;
-
-        if (vz < near)
-        {
-            return Vec3(0, 0, vz);
-        }
 
         float scale = focalLength / vz;
 

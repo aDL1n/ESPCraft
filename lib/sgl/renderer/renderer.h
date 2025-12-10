@@ -26,7 +26,6 @@ namespace sgl
 
         void clear();
 
-        void drawCube(const Vec3 &av, const IVec3 &position);
         void drawMesh(const sgl::Mesh *mesh);
 
         void draw();

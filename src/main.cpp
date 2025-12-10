@@ -5,6 +5,9 @@
 #include "world/chunk.h"
 #include "world/world.h"
 
+#include "renderer/worldRenderer.h"
+#include "renderer/hudRenderer.h"
+
 using namespace sgl;
 
 // TODO
@@ -14,11 +17,13 @@ using namespace sgl;
 // вот тут еще что то можно посмотреть https://github.com/EmberGL-org/EmberGL/
 
 TFT_eSPI tft;
-Camera camera(320, 240, 120);
-Renderer *renderer;
-Hud *hud;
+Camera camera(320, 240, 70);
+Renderer *sgl_renderer;
 
 world::World *w;
+
+renderer::WorldRenderer *worldRenderer;
+renderer::HudRenderer *hudRenderer;
 
 void getRam()
 {
@@ -44,19 +49,21 @@ void setup()
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(0, 24, -32);
-    camera.rotation.x = 40.0f * DEG_TO_RAD;
+    camera.position = sgl::Vec3(0, 17, 0);
+    camera.rotation.x = 8 * DEG_TO_RAD;
     camera.update();
 
-    renderer = new Renderer(&tft, &camera);
-    renderer->init(false);
+    sgl_renderer = new Renderer(&tft, &camera);
+    sgl_renderer->init(false);
 
-    hud = new Hud(renderer->getSprite());
+    hudRenderer = new renderer::HudRenderer(*sgl_renderer->getSprite());
 
     getRam();
 
     w = new world::World();
     w->generate();
+
+    worldRenderer = new renderer::WorldRenderer(*w, *sgl_renderer);
 
     getRam();
 }
@@ -69,13 +76,11 @@ bool place = false;
 
 void render()
 {
-    for (world::Chunk *chunk : w->getChunks())
-        if (chunk != nullptr)
-            renderer->drawMesh(&chunk->getMesh());
-    hud->render();
+    worldRenderer->render();
+    hudRenderer->render();
 
-    renderer->draw();
-    renderer->clear();
+    sgl_renderer->draw();
+    sgl_renderer->clear();
 }
 
 void update()
@@ -92,8 +97,8 @@ void update()
         world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 120);
 
         if (camara_block.hit)
-        {
-            Serial.println("Camera watching to block type:" + String(camara_block.type) + " at position x:" + String(camara_block.position.x) + " y:" + String(camara_block.position.y) + " z:" + String(camara_block.position.z));
+        {   
+            worldRenderer->drawBlockOutline(camara_block.position);
         }
     }
 
@@ -108,6 +113,9 @@ void update()
         yi = 16;
         place = !place;
     }
+
+    camera.rotation.y += 1.0f * DEG_TO_RAD;
+    camera.update();
 }
 
 void loop()

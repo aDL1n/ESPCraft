@@ -2,7 +2,7 @@
 
 #include <ArxContainer.h>
 
-namespace render
+namespace renderer
 {
     
 }
