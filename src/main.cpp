@@ -49,21 +49,21 @@ void setup()
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(0, 17, 0);
-    camera.rotation.x = 8 * DEG_TO_RAD;
+    camera.position = sgl::Vec3(0, 20, 0);
+    camera.rotation.x = 30 * DEG_TO_RAD;
     camera.update();
 
     sgl_renderer = new Renderer(&tft, &camera);
-    sgl_renderer->init(false);
+    sgl_renderer->init();
 
-    hudRenderer = new renderer::HudRenderer(*sgl_renderer->getSprite());
+    hudRenderer = new renderer::HudRenderer(sgl_renderer->getSprite());
 
     getRam();
 
     w = new world::World();
     w->generate();
 
-    worldRenderer = new renderer::WorldRenderer(*w, *sgl_renderer);
+    worldRenderer = new renderer::WorldRenderer(*w, *sgl_renderer, camera);
 
     getRam();
 }
@@ -79,6 +79,13 @@ void render()
     worldRenderer->render();
     hudRenderer->render();
 
+    world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 32);
+
+    if (camara_block.hit)
+    {   
+        worldRenderer->drawBlockOutline(camara_block.position);
+    }
+
     sgl_renderer->draw();
     sgl_renderer->clear();
 }
@@ -93,13 +100,6 @@ void update()
     {
         xi = -16;
         zi++;
-
-        world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 120);
-
-        if (camara_block.hit)
-        {   
-            worldRenderer->drawBlockOutline(camara_block.position);
-        }
     }
 
     if (zi >= 16)

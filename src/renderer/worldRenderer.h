@@ -10,7 +10,7 @@ namespace renderer
     class WorldRenderer
     {
     public:
-        explicit WorldRenderer(world::World &world, sgl::Renderer &sgl_renderer);
+        explicit WorldRenderer(world::World &world, sgl::Renderer &sgl_renderer, sgl::Camera &camera);
 
         void render();
         void drawBlockOutline(sgl::IVec3 blockPosition);
@@ -19,6 +19,7 @@ namespace renderer
     private:
         world::World &world;
         sgl::Renderer &sgl_renderer;
+        sgl::Camera &camera;
 
         uint8_t max_render_distance; // Max render chunks
 

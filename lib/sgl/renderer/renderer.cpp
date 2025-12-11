@@ -34,9 +34,9 @@ namespace sgl
         sprite.pushSprite(0, 0, 0);
     }
 
-    TFT_eSprite *Renderer::getSprite()
+    TFT_eSprite &Renderer::getSprite()
     {
-        return &sprite;
+        return sprite;
     }
 
     void Renderer::drawMesh(const sgl::Mesh *mesh)
