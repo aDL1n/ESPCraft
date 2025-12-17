@@ -75,18 +75,21 @@ uint8_t yi = 16;
 bool place = false;
 
 void render()
-{
+{   
+    
     worldRenderer->render();
-    hudRenderer->render();
-
+    
     world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 32);
-
     if (camara_block.hit)
     {   
         worldRenderer->drawBlockOutline(camara_block.position);
     }
 
     sgl_renderer->draw();
+    
+    hudRenderer->render();
+    
+    sgl_renderer->display();
     sgl_renderer->clear();
 }
 

@@ -5,7 +5,7 @@ namespace sgl
 {
     Renderer::Renderer(TFT_eSPI *display, Camera *camera) : tft(display), sprite(display), camera(camera)
     {
-        renderQueue.reserve(2048);
+        // renderQueue.reserve(2048);
     }
 
     void Renderer::init()
@@ -31,6 +31,29 @@ namespace sgl
 
     void Renderer::draw()
     {
+        std::sort(renderQueue.begin(), renderQueue.end(), [](const RenderItem &a, const RenderItem &b)
+                  { return a.zDepth > b.zDepth; });
+
+        for (const RenderItem &item : renderQueue)
+        {
+            if (item.type)
+                if (debug)
+                {
+                    sprite.drawTriangle(item.x1, item.y1, item.x2, item.y2, item.x3, item.y3, item.color);
+                }
+                else
+                {
+                    sprite.fillTriangle(item.x1, item.y1, item.x2, item.y2, item.x3, item.y3, item.color);
+                }
+            else
+            {
+                sprite.drawLine(item.x1, item.y1, item.x2, item.y2, item.color);
+            }
+        }
+    }
+
+    void Renderer::display()
+    {
         sprite.pushSprite(0, 0, 0);
     }
 
@@ -41,7 +64,6 @@ namespace sgl
 
     void Renderer::drawMesh(const sgl::Mesh *mesh)
     {
-
         const float cx = mesh->position.x;
         const float cy = mesh->position.y;
         const float cz = mesh->position.z;
@@ -59,17 +81,17 @@ namespace sgl
             IVec3 v[4];
             switch (face.index)
             {
-            case 1:
-                v[0] = {x + w, y + h, z};
-                v[1] = {x + w, y, z};
-                v[2] = {x, y, z};
-                v[3] = {x, y + h, z};
-                break;
             case 0:
                 v[0] = {x, y + h, z};
                 v[1] = {x, y, z};
                 v[2] = {x + w, y, z};
                 v[3] = {x + w, y + h, z};
+                break;
+            case 1:
+                v[0] = {x + w, y + h, z};
+                v[1] = {x + w, y, z};
+                v[2] = {x, y, z};
+                v[3] = {x, y + h, z};
                 break;
             case 2:
                 v[0] = {x, y + w, z + h};
@@ -124,29 +146,59 @@ namespace sgl
             if (cross >= 0)
                 continue;
 
-            renderQueue.push_back({(int16_t)projects[0].x, (int16_t)projects[0].y,
+            uint16_t depth = avgZ * 0.25f;
+
+            renderQueue.push_back({RenderType::RT_TRIANGLE,
+                                   (int16_t)projects[0].x, (int16_t)projects[0].y,
                                    (int16_t)projects[1].x, (int16_t)projects[1].y,
                                    (int16_t)projects[2].x, (int16_t)projects[2].y,
+                                   depth,
+                                   face.color});
+
+            renderQueue.push_back({RenderType::RT_TRIANGLE,
+                                   (int16_t)projects[0].x, (int16_t)projects[0].y,
+                                   (int16_t)projects[2].x, (int16_t)projects[2].y,
                                    (int16_t)projects[3].x, (int16_t)projects[3].y,
-                                   (uint16_t)(avgZ * 0.25f),
+                                   depth,
                                    face.color});
         }
+    }
 
-        std::sort(renderQueue.begin(), renderQueue.end(), [](const RenderItem &a, const RenderItem &b)
-                  { return a.zDepth > b.zDepth; });
+    void Renderer::drawLine(Line line, Vec3 position)
+    {
+        Vec3 point1 = {
+            (float)line.x1 + position.x,
+            (float)line.y1 + position.y,
+            (float)line.z1 + position.z
+        };
 
-        for (const RenderItem &item : renderQueue)
-        {
-            if (debug)
-            {
-                sprite.drawTriangle(item.x1, item.y1, item.x2, item.y2, item.x3, item.y3, item.color);
-                sprite.drawTriangle(item.x1, item.y1, item.x3, item.y3, item.x4, item.y4, item.color);
-            }
-            else
-            {
-                sprite.fillTriangle(item.x1, item.y1, item.x2, item.y2, item.x3, item.y3, item.color);
-                sprite.fillTriangle(item.x1, item.y1, item.x3, item.y3, item.x4, item.y4, item.color);
-            }
-        }
+        Vec3 point2 = {
+            (float)line.x2 + position.x,
+            (float)line.y2 + position.y,
+            (float)line.z2 + position.z
+        };
+
+        Vec3 project1 = camera->project(point1);
+        Vec3 project2 = camera->project(point2);
+
+        if (project1.z < camera->near || project2.z < camera->near)
+            return;
+
+        float avgZ = (project1.z + project2.z) * 0.5f;
+        uint16_t depth = (uint16_t)(avgZ * 0.25f);
+
+        renderQueue.push_back({
+            RenderType::RT_LINE,
+            (int16_t)project1.x, (int16_t)project1.y,
+            (int16_t)project2.x, (int16_t)project2.y,
+            0, 0,
+            depth,
+            line.color
+        });
+    }
+
+    TFT_eSPI &Renderer::getDisplay()
+    {
+        return *tft;
     }
 }

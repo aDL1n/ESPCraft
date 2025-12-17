@@ -20,25 +20,19 @@ namespace renderer
         const uint8_t outlineColor = 9;
 
         static const uint8_t cubeEdgeIndices[12][2] = {
-            {0, 1}, {1, 2}, {2, 3}, {3, 0},
-            {4, 5}, {5, 6}, {6, 7}, {7, 4},
-            {0, 4}, {1, 5}, {2, 6}, {3, 7}
-        };
+            {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
 
-        sgl::Vec3 projectedVertices[8];
-        bool isVertexVisible[8];
+        sgl::Vec3 vertices[8];
 
         for (uint8_t vertexIndex = 0; vertexIndex < sgl::Cube::vertices_size; ++vertexIndex)
         {
-            sgl::Vec3 worldPosition;
-            const sgl::IVec3 cubeVertex = sgl::Cube::vertices[vertexIndex];
+            const sgl::IVec3 vertex = sgl::Cube::vertices[vertexIndex];
 
-            worldPosition.x = (float)blockPosition.x + ((cubeVertex.x > 0) ? maximumOffset : minimumOffset);
-            worldPosition.y = (float)blockPosition.y + ((cubeVertex.y > 0) ? maximumOffset : minimumOffset);
-            worldPosition.z = (float)blockPosition.z + ((cubeVertex.z > 0) ? maximumOffset : minimumOffset);
-
-            projectedVertices[vertexIndex] = camera.project(worldPosition);
-            isVertexVisible[vertexIndex] = (projectedVertices[vertexIndex].z > camera.near);
+            vertices[vertexIndex] = {
+                (vertex.x > 0) ? maximumOffset : minimumOffset,
+                (vertex.y > 0) ? maximumOffset : minimumOffset,
+                (vertex.z > 0) ? maximumOffset : minimumOffset
+            };
         }
 
         for (uint8_t edgeIndex = 0; edgeIndex < 12; ++edgeIndex)
@@ -46,15 +40,24 @@ namespace renderer
             uint8_t firstVertexIndex = cubeEdgeIndices[edgeIndex][0];
             uint8_t secondVertexIndex = cubeEdgeIndices[edgeIndex][1];
 
-            if (isVertexVisible[firstVertexIndex] && isVertexVisible[secondVertexIndex])
-            {
-                sgl_renderer.getSprite().drawLine(
-                    projectedVertices[firstVertexIndex].x,
-                    projectedVertices[firstVertexIndex].y,
-                    projectedVertices[secondVertexIndex].x,
-                    projectedVertices[secondVertexIndex].y,
-                    outlineColor);
-            }
+            sgl::Line line{
+                (uint8_t)vertices[firstVertexIndex].x,
+                (uint8_t)vertices[firstVertexIndex].y,
+                (uint8_t)vertices[firstVertexIndex].z,
+                (uint8_t)vertices[secondVertexIndex].x,
+                (uint8_t)vertices[secondVertexIndex].y,
+                (uint8_t)vertices[secondVertexIndex].z,
+                outlineColor
+            };
+
+            sgl_renderer.drawLine(
+                line,
+                {
+                    (float)blockPosition.x,
+                    (float)blockPosition.y,
+                    (float)blockPosition.z
+                }
+            );
         }
     }
 
