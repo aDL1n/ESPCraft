@@ -1,5 +1,6 @@
 #include <TFT_eSPI.h>
 #include <sgl.h>
+#include <scl.h>
 #include <ArxContainer.h>
 
 #include "world/chunk.h"
@@ -24,6 +25,8 @@ world::World *w;
 
 renderer::WorldRenderer *worldRenderer;
 renderer::HudRenderer *hudRenderer;
+
+scl::Joystick *joystick;
 
 void getRam()
 {
@@ -53,6 +56,8 @@ void setup()
     camera.rotation.x = 30 * DEG_TO_RAD;
     camera.update();
 
+    joystick = new scl::Joystick(34, 35, -1, 1024);
+
     sgl_renderer = new Renderer(&tft, &camera);
     sgl_renderer->init();
 
@@ -75,20 +80,20 @@ uint8_t yi = 16;
 bool place = false;
 
 void render()
-{   
-    
+{
+
     worldRenderer->render();
-    
+
     world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 32);
     if (camara_block.hit)
-    {   
+    {
         worldRenderer->drawBlockOutline(camara_block.position);
     }
 
     sgl_renderer->draw();
-    
+
     hudRenderer->render();
-    
+
     sgl_renderer->display();
     sgl_renderer->clear();
 }
@@ -117,7 +122,26 @@ void update()
         place = !place;
     }
 
-    camera.rotation.y += 1.0f * DEG_TO_RAD;
+    joystick->read();
+
+    if (joystick->getX() == scl::State::UP)
+    {
+        camera.rotation.x += 1.0f * DEG_TO_RAD;
+    }
+    else if (joystick->getX() == scl::State::DOWN)
+    {
+        camera.rotation.x -= 1.0f * DEG_TO_RAD;
+    }
+
+    if (joystick->getY() == scl::State::UP)
+    {
+        camera.rotation.y += 1.0f * DEG_TO_RAD;
+    }
+    else if (joystick->getY() == scl::State::DOWN)
+    {
+        camera.rotation.y -= 1.0f * DEG_TO_RAD;
+    }
+
     camera.update();
 }
 
