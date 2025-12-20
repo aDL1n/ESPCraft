@@ -5,7 +5,6 @@ namespace sgl
 {
     Renderer::Renderer(TFT_eSPI *display, Camera *camera) : tft(display), sprite(display), camera(camera)
     {
-        // renderQueue.reserve(2048);
     }
 
     void Renderer::init()
@@ -129,7 +128,7 @@ namespace sgl
                                                v[i].y + cy,
                                                v[i].z + cz});
 
-                if (projects[i].z < camera->near)
+                if (projects[i].z < camera->near || projects[i].z > camera->far)
                 {
                     visible = false;
                     break;
@@ -148,14 +147,14 @@ namespace sgl
 
             uint16_t depth = avgZ * 0.25f;
 
-            renderQueue.push_back({RenderType::RT_TRIANGLE,
+            renderQueue.push_back({RenderType::TRIANGLE,
                                    (int16_t)projects[0].x, (int16_t)projects[0].y,
                                    (int16_t)projects[1].x, (int16_t)projects[1].y,
                                    (int16_t)projects[2].x, (int16_t)projects[2].y,
                                    depth,
                                    face.color});
 
-            renderQueue.push_back({RenderType::RT_TRIANGLE,
+            renderQueue.push_back({RenderType::TRIANGLE,
                                    (int16_t)projects[0].x, (int16_t)projects[0].y,
                                    (int16_t)projects[2].x, (int16_t)projects[2].y,
                                    (int16_t)projects[3].x, (int16_t)projects[3].y,
@@ -169,14 +168,12 @@ namespace sgl
         Vec3 point1 = {
             (float)line.x1 + position.x,
             (float)line.y1 + position.y,
-            (float)line.z1 + position.z
-        };
+            (float)line.z1 + position.z};
 
         Vec3 point2 = {
             (float)line.x2 + position.x,
             (float)line.y2 + position.y,
-            (float)line.z2 + position.z
-        };
+            (float)line.z2 + position.z};
 
         Vec3 project1 = camera->project(point1);
         Vec3 project2 = camera->project(point2);
@@ -187,14 +184,12 @@ namespace sgl
         float avgZ = (project1.z + project2.z) * 0.5f;
         uint16_t depth = (uint16_t)(avgZ * 0.25f);
 
-        renderQueue.push_back({
-            RenderType::RT_LINE,
-            (int16_t)project1.x, (int16_t)project1.y,
-            (int16_t)project2.x, (int16_t)project2.y,
-            0, 0,
-            depth,
-            line.color
-        });
+        renderQueue.push_back({RenderType::LINE,
+                               (int16_t)project1.x, (int16_t)project1.y,
+                               (int16_t)project2.x, (int16_t)project2.y,
+                               0, 0,
+                               depth,
+                               line.color});
     }
 
     TFT_eSPI &Renderer::getDisplay()

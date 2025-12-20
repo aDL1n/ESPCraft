@@ -21,7 +21,7 @@ namespace renderer
         sgl::Renderer &sgl_renderer;
         sgl::Camera &camera;
 
-        uint8_t max_render_distance; // Max render chunks
+        uint8_t max_render_distance = 1; // Max render chunks
 
         void renderChunks();
     };

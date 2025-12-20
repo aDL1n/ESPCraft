@@ -15,8 +15,8 @@ namespace sgl
     {
     enum RenderType: bool
     {
-        RT_TRIANGLE=1,
-        RT_LINE=0
+        TRIANGLE=1,
+        LINE=0
     };
 
     struct RenderItem {

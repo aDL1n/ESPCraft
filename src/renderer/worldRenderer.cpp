@@ -11,6 +11,9 @@ namespace renderer
     {
         this->renderChunks();
     }
+    
+    static const uint8_t cubeEdgeIndices[12][2] = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
 
     void WorldRenderer::drawBlockOutline(sgl::IVec3 blockPosition)
     {
@@ -18,9 +21,6 @@ namespace renderer
         const float minimumOffset = -epsilon;
         const float maximumOffset = 1.0f + epsilon;
         const uint8_t outlineColor = 9;
-
-        static const uint8_t cubeEdgeIndices[12][2] = {
-            {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
 
         sgl::Vec3 vertices[8];
 
@@ -31,8 +31,7 @@ namespace renderer
             vertices[vertexIndex] = {
                 (vertex.x > 0) ? maximumOffset : minimumOffset,
                 (vertex.y > 0) ? maximumOffset : minimumOffset,
-                (vertex.z > 0) ? maximumOffset : minimumOffset
-            };
+                (vertex.z > 0) ? maximumOffset : minimumOffset};
         }
 
         for (uint8_t edgeIndex = 0; edgeIndex < 12; ++edgeIndex)
@@ -47,17 +46,13 @@ namespace renderer
                 (uint8_t)vertices[secondVertexIndex].x,
                 (uint8_t)vertices[secondVertexIndex].y,
                 (uint8_t)vertices[secondVertexIndex].z,
-                outlineColor
-            };
+                outlineColor};
 
             sgl_renderer.drawLine(
                 line,
-                {
-                    (float)blockPosition.x,
-                    (float)blockPosition.y,
-                    (float)blockPosition.z
-                }
-            );
+                {(float)blockPosition.x,
+                 (float)blockPosition.y,
+                 (float)blockPosition.z});
         }
     }
 
@@ -68,8 +63,30 @@ namespace renderer
 
     void WorldRenderer::renderChunks()
     {
+        int32_t playerChunkX = (int32_t)camera.position.x >> 4;
+        int32_t playerChunkZ = (int32_t)camera.position.z >> 4;
+
         for (world::Chunk *chunk : world.getChunks())
-            if (chunk != nullptr)
-                sgl_renderer.drawMesh(&chunk->getMesh());
+        {
+            if (chunk == nullptr)
+                continue;
+
+            int32_t dx = chunk->position.x - playerChunkX;
+            int32_t dz = chunk->position.z - playerChunkZ;
+
+            if (dx < 0)
+                dx = -dx;
+
+            if (dx > max_render_distance)
+                continue;
+
+            if (dz < 0)
+                dz = -dz;
+
+            if (dz > max_render_distance)
+                continue;
+
+            sgl_renderer.drawMesh(&chunk->getMesh());
+        }
     }
 }

@@ -18,7 +18,7 @@ using namespace sgl;
 // вот тут еще что то можно посмотреть https://github.com/EmberGL-org/EmberGL/
 
 TFT_eSPI tft;
-Camera camera(320, 240, 70);
+Camera camera(320, 240, 90);
 Renderer *sgl_renderer;
 
 world::World *w;
@@ -52,8 +52,8 @@ void setup()
     tft.init();
     tft.setRotation(1);
 
-    camera.position = sgl::Vec3(0, 20, 0);
-    camera.rotation.x = 30 * DEG_TO_RAD;
+    camera.position = sgl::Vec3(0, 18, 0);
+    camera.rotation.x = 20 * DEG_TO_RAD;
     camera.update();
 
     joystick = new scl::Joystick(34, 35, -1, 1024);
@@ -84,7 +84,7 @@ void render()
 
     worldRenderer->render();
 
-    world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 32);
+    world::BlockHit camara_block = w->getBlockAtView(camera.position, camera.getForward(), 8);
     if (camara_block.hit)
     {
         worldRenderer->drawBlockOutline(camara_block.position);
@@ -122,26 +122,27 @@ void update()
         place = !place;
     }
 
-    joystick->read();
+    // joystick->read();
 
-    if (joystick->getX() == scl::State::UP)
-    {
-        camera.rotation.x += 1.0f * DEG_TO_RAD;
-    }
-    else if (joystick->getX() == scl::State::DOWN)
-    {
-        camera.rotation.x -= 1.0f * DEG_TO_RAD;
-    }
+    // if (joystick->getX() == scl::State::UP)
+    // {
+    //     camera.rotation.x += 1.0f * DEG_TO_RAD;
+    // }
+    // else if (joystick->getX() == scl::State::DOWN)
+    // {
+    //     camera.rotation.x -= 1.0f * DEG_TO_RAD;
+    // }
 
-    if (joystick->getY() == scl::State::UP)
-    {
-        camera.rotation.y += 1.0f * DEG_TO_RAD;
-    }
-    else if (joystick->getY() == scl::State::DOWN)
-    {
-        camera.rotation.y -= 1.0f * DEG_TO_RAD;
-    }
+    // if (joystick->getY() == scl::State::UP)
+    // {
+    //     camera.rotation.y += 1.0f * DEG_TO_RAD;
+    // }
+    // else if (joystick->getY() == scl::State::DOWN)
+    // {
+    //     camera.rotation.y -= 1.0f * DEG_TO_RAD;
+    // }
 
+    camera.rotation.y += 0.5f * DEG_TO_RAD;
     camera.update();
 }
 
