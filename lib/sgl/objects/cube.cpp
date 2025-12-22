@@ -14,7 +14,7 @@ namespace sgl
         IVec3(-1,  1,  1)
     };
 
-    constexpr Face Cube::faces[Cube::faces_size]
+    const Face Cube::faces[Cube::faces_size]
     {
         {0, 1, 2, 3, 12},
         {4, 7, 6, 5, 9},

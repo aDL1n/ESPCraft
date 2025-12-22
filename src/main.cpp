@@ -9,13 +9,8 @@
 #include "renderer/worldRenderer.h"
 #include "renderer/hudRenderer.h"
 
+
 using namespace sgl;
-
-// TODO
-// дописать vec2 и ivec2
-// сделать вывод и рендер в разных ядрах есп (также как вариант 1 ядро графика, другое физика и логика)
-
-// вот тут еще что то можно посмотреть https://github.com/EmberGL-org/EmberGL/
 
 TFT_eSPI tft;
 Camera camera(320, 240, 90);
@@ -27,6 +22,7 @@ renderer::WorldRenderer *worldRenderer;
 renderer::HudRenderer *hudRenderer;
 
 scl::Joystick *joystick;
+scl::Buttons<4> *buttons;
 
 void getRam()
 {
@@ -45,6 +41,7 @@ void getRam()
 void setup()
 {
     Serial.begin(115200);
+
     while (!Serial)
     {
     }
@@ -57,6 +54,7 @@ void setup()
     camera.update();
 
     joystick = new scl::Joystick(34, 35, -1, 1024);
+    // buttons = new scl::Buttons({pin1, pin2, pin3, pin4});
 
     sgl_renderer = new Renderer(&tft, &camera);
     sgl_renderer->init();
@@ -122,27 +120,26 @@ void update()
         place = !place;
     }
 
-    // joystick->read();
+    joystick->read();
 
-    // if (joystick->getX() == scl::State::UP)
-    // {
-    //     camera.rotation.x += 1.0f * DEG_TO_RAD;
-    // }
-    // else if (joystick->getX() == scl::State::DOWN)
-    // {
-    //     camera.rotation.x -= 1.0f * DEG_TO_RAD;
-    // }
+    if (joystick->getX() == scl::State::UP)
+    {
+        camera.rotation.x += 1.0f * DEG_TO_RAD;
+    }
+    else if (joystick->getX() == scl::State::DOWN)
+    {
+        camera.rotation.x -= 1.0f * DEG_TO_RAD;
+    }
 
-    // if (joystick->getY() == scl::State::UP)
-    // {
-    //     camera.rotation.y += 1.0f * DEG_TO_RAD;
-    // }
-    // else if (joystick->getY() == scl::State::DOWN)
-    // {
-    //     camera.rotation.y -= 1.0f * DEG_TO_RAD;
-    // }
+    if (joystick->getY() == scl::State::UP)
+    {
+        camera.rotation.y += 1.0f * DEG_TO_RAD;
+    }
+    else if (joystick->getY() == scl::State::DOWN)
+    {
+        camera.rotation.y -= 1.0f * DEG_TO_RAD;
+    }
 
-    camera.rotation.y += 0.5f * DEG_TO_RAD;
     camera.update();
 }
 
